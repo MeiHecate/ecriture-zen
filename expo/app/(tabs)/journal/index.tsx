@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, Flame, Trash2, BookOpen } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import * as WebBrowser from 'expo-web-browser';
 import Colors from '@/constants/colors';
 import { useEntries } from '@/contexts/EntriesContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -98,6 +99,11 @@ export default function JournalScreen() {
 
   const keyExtractor = useCallback((item: Entry) => item.id, []);
 
+  const handlePrivacyPolicy = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    WebBrowser.openBrowserAsync('https://maelrochard.com/privacy');
+  }, []);
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -114,6 +120,9 @@ export default function JournalScreen() {
           <Text style={styles.emptySubtitle}>
             {t.journal.emptySubtitle}
           </Text>
+          <TouchableOpacity onPress={handlePrivacyPolicy} hitSlop={8}>
+            <Text style={styles.privacyLink}>{t.journal.privacyPolicy}</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -125,6 +134,11 @@ export default function JournalScreen() {
             { paddingBottom: insets.bottom + 20 },
           ]}
           showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            <TouchableOpacity onPress={handlePrivacyPolicy} hitSlop={8} style={styles.privacyFooter}>
+              <Text style={styles.privacyLink}>{t.journal.privacyPolicy}</Text>
+            </TouchableOpacity>
+          }
         />
       )}
     </View>
@@ -210,5 +224,14 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  privacyFooter: {
+    alignItems: 'center',
+    paddingTop: 20,
+  },
+  privacyLink: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    textDecorationLine: 'underline',
   },
 });

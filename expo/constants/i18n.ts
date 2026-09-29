@@ -33,6 +33,7 @@ export interface Translations {
     today: string;
     yesterday: string;
     daysAgo: (days: number) => string;
+    privacyPolicy: string;
   };
   notFound: {
     title: string;
@@ -74,6 +75,7 @@ const en: Translations = {
     today: 'Today,',
     yesterday: 'Yesterday,',
     daysAgo: (days: number) => `${days} days ago`,
+    privacyPolicy: 'Privacy policy',
   },
   notFound: {
     title: 'Page not found',
@@ -115,6 +117,7 @@ const fr: Translations = {
     today: "Aujourd'hui,",
     yesterday: 'Hier,',
     daysAgo: (days: number) => `Il y a ${days} jours`,
+    privacyPolicy: 'Politique de confidentialité',
   },
   notFound: {
     title: 'Page introuvable',

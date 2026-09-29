@@ -26,7 +26,12 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#22252D"
       },
-      "package": "app.espaceecritturezen.com"
+      "package": "app.espaceecritturezen.com",
+      "versionCode": 1,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
