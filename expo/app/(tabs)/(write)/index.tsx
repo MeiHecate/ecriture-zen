@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,16 +10,23 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, Flame, Archive, Wind } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '@/constants/colors';
 import { useEntries } from '@/contexts/EntriesContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MoodType } from '@/types/entry';
 
 type Phase = 'mood' | 'writing' | 'done';
+
+const DRAFT_KEY = 'zen_draft_v1';
+
+type Draft = { mood: MoodType; text: string };
 
 export default function WriteScreen() {
   const insets = useSafeAreaInsets();
@@ -35,6 +42,50 @@ export default function WriteScreen() {
   const floatAnim = useRef(new Animated.Value(0)).current;
   const doneOpacity = useRef(new Animated.Value(0)).current;
   const doneMessage = useRef<string>('');
+  const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearDraft = useCallback(() => {
+    AsyncStorage.removeItem(DRAFT_KEY);
+  }, []);
+
+  // Restore an in-progress draft (app was killed/backgrounded while writing).
+  useEffect(() => {
+    AsyncStorage.getItem(DRAFT_KEY).then((stored) => {
+      if (!stored) return;
+      try {
+        const draft = JSON.parse(stored) as Draft;
+        if (draft.text?.trim()) {
+          setMood(draft.mood);
+          setText(draft.text);
+          setPhase('writing');
+        }
+      } catch {
+        // corrupt draft, ignore
+      }
+    });
+  }, []);
+
+  // Debounced save of the draft while writing.
+  useEffect(() => {
+    if (phase !== 'writing' || !mood) return;
+    if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+    draftSaveTimer.current = setTimeout(() => {
+      AsyncStorage.setItem(DRAFT_KEY, JSON.stringify({ mood, text } as Draft));
+    }, 500);
+    return () => {
+      if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+    };
+  }, [phase, mood, text]);
+
+  // Immediate save when the OS backgrounds the app (no time for the debounce to fire).
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if ((state === 'background' || state === 'inactive') && phase === 'writing' && mood) {
+        AsyncStorage.setItem(DRAFT_KEY, JSON.stringify({ mood, text } as Draft));
+      }
+    });
+    return () => subscription.remove();
+  }, [phase, mood, text]);
 
   const resetAll = useCallback(() => {
     fadeAnim.setValue(1);
@@ -57,6 +108,7 @@ export default function WriteScreen() {
     Keyboard.dismiss();
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addEntry(mood, text.trim());
+    clearDraft();
     doneMessage.current = t.write.doneKeep;
     setPhase('done');
     Animated.timing(doneOpacity, {
@@ -65,7 +117,7 @@ export default function WriteScreen() {
       useNativeDriver: true,
     }).start();
     setTimeout(resetAll, 2200);
-  }, [mood, text, addEntry, doneOpacity, resetAll, t]);
+  }, [mood, text, addEntry, clearDraft, doneOpacity, resetAll, t]);
 
   const handleLetGo = useCallback(() => {
     if (!text.trim()) return;
@@ -89,6 +141,7 @@ export default function WriteScreen() {
         useNativeDriver: true,
       }),
     ]).start(() => {
+      clearDraft();
       doneMessage.current = t.write.doneLetGo;
       setPhase('done');
       Animated.timing(doneOpacity, {
@@ -98,14 +151,15 @@ export default function WriteScreen() {
       }).start();
       setTimeout(resetAll, 2200);
     });
-  }, [text, fadeAnim, scaleAnim, floatAnim, doneOpacity, resetAll, t]);
+  }, [text, fadeAnim, scaleAnim, floatAnim, clearDraft, doneOpacity, resetAll, t]);
 
   const handleBack = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    clearDraft();
     setPhase('mood');
     setMood(null);
     setText('');
-  }, []);
+  }, [clearDraft]);
 
   if (phase === 'done') {
     return (
