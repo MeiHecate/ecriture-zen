@@ -1,0 +1,22 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "production": {
+      "autoIncrement": false,
+      "ios": {
+        "credentialsSource": "local"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6761679327",
+        "appleTeamId": "85228RBZF6"
+      }
+    }
+  }
+}
