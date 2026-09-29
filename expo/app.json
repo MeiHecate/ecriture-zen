@@ -2,7 +2,7 @@
   "expo": {
     "name": "Espace d'Écriture Zen",
     "slug": "espace-d-ecriture-zen",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "espace-ecriture-zen",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.espaceecritturezen.com",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
