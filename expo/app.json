@@ -24,7 +24,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#1C1C1E"
+        "backgroundColor": "#22252D"
       },
       "package": "app.espaceecritturezen.com"
     },
