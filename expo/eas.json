@@ -7,7 +7,8 @@
     "production": {
       "autoIncrement": false,
       "ios": {
-        "credentialsSource": "local"
+        "credentialsSource": "local",
+        "image": "macos-sequoia-15.6-xcode-26.0"
       },
       "android": {
         "buildType": "app-bundle"
