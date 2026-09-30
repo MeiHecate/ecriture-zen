@@ -16,12 +16,12 @@ import { useEntries } from '@/contexts/EntriesContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Translations, Language } from '@/constants/i18n';
 import { Entry } from '@/types/entry';
+import { calendarDaysBetween } from '@/utils/date';
 
 function formatDate(dateStr: string, t: Translations, language: Language): string {
   const date = new Date(dateStr);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffDays = calendarDaysBetween(date, now);
   const locale = language === 'fr' ? 'fr-FR' : 'en-US';
 
   if (diffDays === 0) {
